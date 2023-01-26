@@ -1,0 +1,79 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+
+public class PlayerScript : MonoBehaviour
+{
+	public Text countText;
+	public Text winText;
+	public Text loseText;
+	public Text timerText;
+	public float speed;
+	private Rigidbody myBody;
+
+	private float totalTime;
+	private float timeLeft;
+	public bool gameWon;
+
+	public int score = 0;
+
+	public GameObject reset;
+	public GameObject next;
+
+
+	void Start()
+	{
+		winText.text = "";  //initialize the winText value
+		loseText.text = ""; //initialize the loseText value
+		myBody = GetComponent<Rigidbody>();
+		countText.text = "Score: 0/6";
+		gameWon = false;
+		totalTime = 75;
+		timeLeft = totalTime;
+		timerText.text = "Timer: 00:00" + timeLeft.ToString("F1");
+		reset.gameObject.SetActive(false);
+		next.gameObject.SetActive(false);
+	}
+	void FixedUpdate()
+	{
+		float moveHorizontal = Input.GetAxis("Horizontal");     //Access the right and left arrow keys
+		float moveVertical = Input.GetAxis("Vertical");         //Access the up and down arrow keys
+		Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical); //Vector3s deal with movement in 3D space.  X, Y, and Z aspects.  In this case the Y is zero.  Vector3s take floats.
+		myBody.AddForce(movement * speed); //This accesses the rigidbody component and adds force ot get it moving
+
+		timerText.text = "Timer: " + timeLeft.ToString("F1");
+		if (gameWon == false)
+		{
+			timeLeft -= Time.deltaTime;
+			if (timeLeft < 0)
+			{
+				loseText.text = "YOU LOSE";
+				reset.gameObject.SetActive(true);
+				timerText.text = "Timer: 0";
+				gameObject.SetActive(false);
+			}
+		}
+	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.CompareTag("Pickup"))
+		{
+			other.gameObject.SetActive(false);
+			score++;
+			countText.text = "Score: " + score.ToString() + "/6";
+		}
+		if (score == 6)
+		{
+			gameWon = true;
+			winText.text = "YOU WIN";
+			gameObject.SetActive(false);
+			next.gameObject.SetActive(true);
+		}
+		if (other.gameObject.CompareTag("death"))
+		{
+			timeLeft = 0;
+		}
+	}
+
+}
